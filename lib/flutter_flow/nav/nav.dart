@@ -86,9 +86,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'main_notifications',
           path: '/mainNotifications',
-          builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'main_notifications')
-              : const MainNotificationsWidget(),
+          builder: (context, params) => const MainNotificationsWidget(),
         ),
         FFRoute(
           name: 'main_dashboard',
@@ -140,6 +138,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                     ParamType.String,
                   ),
                 ),
+        ),
+        FFRoute(
+          name: 'main_new_claim',
+          path: '/NewClaim',
+          builder: (context, params) => const MainNewClaimWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

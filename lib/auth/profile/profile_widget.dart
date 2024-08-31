@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/flutter_flow/upload_data.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -36,8 +37,20 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (FFAppState().isProfileSet == true) {
+      _model.userData = await UsersTable().queryRows(
+        queryFn: (q) => q.eq(
+          'user_id',
+          currentUserUid,
+        ),
+      );
+      if (_model.userData?.first.firstName != null &&
+          _model.userData?.first.firstName != '') {
         context.pushNamed('main_dashboard');
+      } else {
+        FFAppState().firstName = _model.userData!.first.firstName!;
+        FFAppState().lastName = _model.userData!.first.lastName!;
+        FFAppState().userRole = _model.userData!.first.userRole!;
+        setState(() {});
       }
     });
 
@@ -201,47 +214,125 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                               Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Align(
-                                    alignment: const AlignmentDirectional(0.0, 0.0),
-                                    child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 24.0),
-                                      child: FlutterFlowRadioButton(
-                                        options: ['Client', 'Broker'].toList(),
-                                        onChanged: (val) => setState(() {}),
-                                        controller: _model
-                                                .radioButtonValueController ??=
-                                            FormFieldController<String>(null),
-                                        optionHeight: 32.0,
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 20.0),
+                                    child: Container(
+                                      width: 100.0,
+                                      height: 100.0,
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.network(
+                                        valueOrDefault<String>(
+                                          _model.uploadedFileUrl,
+                                          'https://nsoghqqtwvbssfeqjrtf.supabase.co/storage/v1/object/public/CloudCorsairs/users/pics/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.webp',
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 24.0),
+                                    child: FFButtonWidget(
+                                      onPressed: () async {
+                                        final selectedMedia =
+                                            await selectMediaWithSourceBottomSheet(
+                                          context: context,
+                                          storageFolderPath: 'users/pics',
+                                          allowPhoto: true,
+                                        );
+                                        if (selectedMedia != null &&
+                                            selectedMedia.every((m) =>
+                                                validateFileFormat(
+                                                    m.storagePath, context))) {
+                                          setState(() =>
+                                              _model.isDataUploading = true);
+                                          var selectedUploadedFiles =
+                                              <FFUploadedFile>[];
+
+                                          var downloadUrls = <String>[];
+                                          try {
+                                            selectedUploadedFiles =
+                                                selectedMedia
+                                                    .map((m) => FFUploadedFile(
+                                                          name: m.storagePath
+                                                              .split('/')
+                                                              .last,
+                                                          bytes: m.bytes,
+                                                          height: m.dimensions
+                                                              ?.height,
+                                                          width: m.dimensions
+                                                              ?.width,
+                                                          blurHash: m.blurHash,
+                                                        ))
+                                                    .toList();
+
+                                            downloadUrls =
+                                                await uploadSupabaseStorageFiles(
+                                              bucketName: 'CloudCorsairs',
+                                              selectedFiles: selectedMedia,
+                                            );
+                                          } finally {
+                                            _model.isDataUploading = false;
+                                          }
+                                          if (selectedUploadedFiles.length ==
+                                                  selectedMedia.length &&
+                                              downloadUrls.length ==
+                                                  selectedMedia.length) {
+                                            setState(() {
+                                              _model.uploadedLocalFile =
+                                                  selectedUploadedFiles.first;
+                                              _model.uploadedFileUrl =
+                                                  downloadUrls.first;
+                                            });
+                                          } else {
+                                            setState(() {});
+                                            return;
+                                          }
+                                        }
+
+                                        await UsersTable().update(
+                                          data: {
+                                            'profile_pic':
+                                                _model.uploadedFileUrl,
+                                          },
+                                          matchingRows: (rows) => rows.eq(
+                                            'user_id',
+                                            currentUserUid,
+                                          ),
+                                        );
+                                        FFAppState().profilePic =
+                                            _model.uploadedFileUrl;
+                                        setState(() {});
+                                      },
+                                      text: 'Upload Image',
+                                      options: FFButtonOptions(
+                                        width: 190.0,
+                                        height: 50.0,
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
+                                        iconPadding:
+                                            const EdgeInsetsDirectional.fromSTEB(
+                                                0.0, 0.0, 0.0, 0.0),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondary,
                                         textStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
+                                            .titleSmall
                                             .override(
                                               fontFamily: 'Plus Jakarta Sans',
+                                              color: Colors.black,
                                               letterSpacing: 0.0,
                                             ),
-                                        selectedTextStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'Plus Jakarta Sans',
-                                                  fontSize: 14.0,
-                                                  letterSpacing: 0.0,
-                                                ),
-                                        buttonPosition:
-                                            RadioButtonPosition.left,
-                                        direction: Axis.vertical,
-                                        radioButtonColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                        inactiveRadioButtonColor:
-                                            FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                        toggleable: false,
-                                        horizontalAlignment:
-                                            WrapAlignment.start,
-                                        verticalAlignment:
-                                            WrapCrossAlignment.start,
+                                        elevation: 3.0,
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(50.0),
                                       ),
                                     ),
                                   ),
@@ -428,36 +519,105 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                       ),
                                     ),
                                   ),
+                                  Align(
+                                    alignment: const AlignmentDirectional(0.0, 0.0),
+                                    child: Padding(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 24.0),
+                                      child: FlutterFlowRadioButton(
+                                        options: ['Client', 'Broker'].toList(),
+                                        onChanged: (val) => setState(() {}),
+                                        controller: _model
+                                                .radioButtonValueController ??=
+                                            FormFieldController<String>(
+                                                FFAppState().userRole),
+                                        optionHeight: 32.0,
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .override(
+                                              fontFamily: 'Plus Jakarta Sans',
+                                              letterSpacing: 0.0,
+                                            ),
+                                        selectedTextStyle:
+                                            FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  fontFamily:
+                                                      'Plus Jakarta Sans',
+                                                  fontSize: 14.0,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                        buttonPosition:
+                                            RadioButtonPosition.left,
+                                        direction: Axis.vertical,
+                                        radioButtonColor:
+                                            FlutterFlowTheme.of(context)
+                                                .primary,
+                                        inactiveRadioButtonColor:
+                                            FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                        toggleable: false,
+                                        horizontalAlignment:
+                                            WrapAlignment.start,
+                                        verticalAlignment:
+                                            WrapCrossAlignment.start,
+                                      ),
+                                    ),
+                                  ),
+                                  FFButtonWidget(
+                                    onPressed: () async {
+                                      await UsersTable().insert({
+                                        'user_id': currentUserUid,
+                                        'first_name':
+                                            _model.firstNameTextController.text,
+                                        'last_name':
+                                            _model.lastNameTextController.text,
+                                        'user_role': _model.radioButtonValue,
+                                      });
+                                      FFAppState().firstName =
+                                          _model.firstNameTextController.text;
+                                      FFAppState().lastName =
+                                          _model.lastNameTextController.text;
+                                      FFAppState().userRole =
+                                          _model.radioButtonValue!;
+                                      FFAppState().isProfileSet = true;
+
+                                      context.pushNamed('main_dashboard');
+                                    },
+                                    text: 'Save',
+                                    options: FFButtonOptions(
+                                      width: 190.0,
+                                      height: 50.0,
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                      iconPadding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondary,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            fontFamily: 'Plus Jakarta Sans',
+                                            color: Colors.black,
+                                            letterSpacing: 0.0,
+                                          ),
+                                      elevation: 3.0,
+                                      borderSide: const BorderSide(
+                                        color: Colors.transparent,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(50.0),
+                                    ),
+                                  ),
                                   Padding(
                                     padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 24.0, 0.0, 0.0),
                                     child: FFButtonWidget(
                                       onPressed: () async {
-                                        await UsersTable().insert({
-                                          'user_id': currentUserUid,
-                                          'first_name': _model
-                                              .firstNameTextController.text,
-                                          'last_name': _model
-                                              .lastNameTextController.text,
-                                          'user_role': _model.radioButtonValue,
-                                        });
-                                        FFAppState().firstName =
-                                            _model.firstNameTextController.text;
-                                        FFAppState().lastName =
-                                            _model.lastNameTextController.text;
-                                        FFAppState().userRole =
-                                            _model.radioButtonValue!;
-                                        FFAppState().isProfileSet = true;
-                                        setState(() {
-                                          _model.firstNameTextController
-                                              ?.clear();
-                                          _model.lastNameTextController
-                                              ?.clear();
-                                        });
-
                                         context.pushNamed('main_dashboard');
                                       },
-                                      text: 'Confirm',
+                                      text: 'Next',
                                       options: FFButtonOptions(
                                         width: 190.0,
                                         height: 50.0,
@@ -467,7 +627,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                             const EdgeInsetsDirectional.fromSTEB(
                                                 0.0, 0.0, 0.0, 0.0),
                                         color: FlutterFlowTheme.of(context)
-                                            .secondary,
+                                            .primary,
                                         textStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .override(

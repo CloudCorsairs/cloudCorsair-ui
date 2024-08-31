@@ -74,6 +74,13 @@ class FFAppState extends ChangeNotifier {
     _isProfileSet = value;
     prefs.setBool('ff_isProfileSet', value);
   }
+
+  String _profilePic =
+      'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NjJ8fHVzZXJzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60';
+  String get profilePic => _profilePic;
+  set profilePic(String value) {
+    _profilePic = value;
+  }
 }
 
 void _safeInit(Function() initializeField) {

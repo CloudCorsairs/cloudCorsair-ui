@@ -1,9 +1,12 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/components/side_nav_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 import 'main_profile_model.dart';
 export 'main_profile_model.dart';
 
@@ -24,6 +27,9 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
     super.initState();
     _model = createModel(context, () => MainProfileModel());
 
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {});
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -36,6 +42,8 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -91,8 +99,7 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
                                           const Duration(milliseconds: 500),
                                       fadeOutDuration:
                                           const Duration(milliseconds: 500),
-                                      imageUrl:
-                                          'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NjJ8fHVzZXJzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
+                                      imageUrl: FFAppState().profilePic,
                                       width: 44.0,
                                       height: 44.0,
                                       fit: BoxFit.cover,
@@ -108,7 +115,7 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Casper Ghost',
+                                      '${FFAppState().firstName} ${FFAppState().lastName}',
                                       style: FlutterFlowTheme.of(context)
                                           .headlineSmall
                                           .override(
@@ -120,7 +127,7 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
                                       padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 4.0, 0.0, 0.0),
                                       child: Text(
-                                        'ghost@domain.com',
+                                        currentUserEmail,
                                         style: FlutterFlowTheme.of(context)
                                             .labelMedium
                                             .override(
@@ -213,11 +220,22 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
                                         child: Align(
                                           alignment:
                                               const AlignmentDirectional(1.0, 0.0),
-                                          child: Icon(
-                                            Icons.arrow_forward_ios,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            size: 20.0,
+                                          child: InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              context
+                                                  .pushNamed('forgot-password');
+                                            },
+                                            child: Icon(
+                                              Icons.arrow_forward_ios,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
+                                              size: 20.0,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -717,8 +735,12 @@ class _MainProfileWidgetState extends State<MainProfileWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 24.0, 0.0, 0.0),
                             child: FFButtonWidget(
-                              onPressed: () {
-                                print('Button pressed ...');
+                              onPressed: () async {
+                                GoRouter.of(context).prepareAuthEvent();
+                                await authManager.signOut();
+                                GoRouter.of(context).clearRedirectLocation();
+
+                                context.goNamedAuth('login', context.mounted);
                               },
                               text: 'Log Out',
                               options: FFButtonOptions(

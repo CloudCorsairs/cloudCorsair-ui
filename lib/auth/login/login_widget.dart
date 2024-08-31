@@ -1207,6 +1207,16 @@ class _LoginWidgetState extends State<LoginWidget>
                                                                 FFButtonWidget(
                                                               onPressed:
                                                                   () async {
+                                                                FFAppState()
+                                                                    .firstName = '';
+                                                                FFAppState()
+                                                                    .lastName = '';
+                                                                FFAppState()
+                                                                    .userRole = '';
+                                                                FFAppState()
+                                                                        .isProfileSet =
+                                                                    false;
+                                                                setState(() {});
                                                                 GoRouter.of(
                                                                         context)
                                                                     .prepareAuthEvent();

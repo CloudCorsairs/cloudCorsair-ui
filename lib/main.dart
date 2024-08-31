@@ -122,7 +122,6 @@ class _NavBarPageState extends State<NavBarPage> {
   Widget build(BuildContext context) {
     final tabs = {
       'main_dashboard': const MainDashboardWidget(),
-      'main_notifications': const MainNotificationsWidget(),
       'main_recent': const MainRecentWidget(),
       'main_profile': const MainProfileWidget(),
       'profile': const ProfileWidget(),
@@ -156,14 +155,6 @@ class _NavBarPageState extends State<NavBarPage> {
                 size: 24.0,
               ),
               label: '__',
-              tooltip: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.notifications_rounded,
-                size: 24.0,
-              ),
-              label: '--',
               tooltip: '',
             ),
             BottomNavigationBarItem(

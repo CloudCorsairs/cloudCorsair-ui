@@ -2,12 +2,11 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
 import '/components/side_nav_widget.dart';
 import '/flutter_flow/flutter_flow_data_table.dart';
-import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/flutter_flow_expanded_image_view.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/form_field_controller.dart';
-import 'package:easy_debounce/easy_debounce.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -34,29 +33,37 @@ class _MainDashboardWidgetState extends State<MainDashboardWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (FFAppState().isProfileSet) {
+      if (FFAppState().userRole == 'Client') {
+        _model.claimsClient = await ClaimsTable().queryRows(
+          queryFn: (q) => q
+              .eq(
+                'user_id',
+                currentUserUid,
+              )
+              .order('id'),
+        );
+        _model.claimsDataRows = _model.claimsClient!.toList().cast<ClaimsRow>();
+        setState(() {});
+      } else {
         _model.claimsAll = await ClaimsTable().queryRows(
-          queryFn: (q) => q.order('id', ascending: true),
+          queryFn: (q) => q.order('id'),
         );
         _model.claimsDataRows = _model.claimsAll!.toList().cast<ClaimsRow>();
         setState(() {});
-        _model.authUser = await UsersTable().queryRows(
-          queryFn: (q) => q.eq(
-            'user_id',
-            currentUserUid,
-          ),
-        );
-        FFAppState().firstName = _model.authUser!.first.firstName!;
-        FFAppState().lastName = _model.authUser!.first.lastName!;
-        FFAppState().userRole = _model.authUser!.first.userRole!;
-        setState(() {});
-      } else {
-        context.pushNamed('profile');
       }
-    });
 
-    _model.textController ??= TextEditingController();
-    _model.textFieldFocusNode ??= FocusNode();
+      _model.authUser = await UsersTable().queryRows(
+        queryFn: (q) => q.eq(
+          'user_id',
+          currentUserUid,
+        ),
+      );
+      FFAppState().firstName = _model.authUser!.first.firstName!;
+      FFAppState().lastName = _model.authUser!.first.lastName!;
+      FFAppState().userRole = _model.authUser!.first.userRole!;
+      FFAppState().profilePic = _model.authUser!.first.profilePic!;
+      setState(() {});
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
@@ -115,18 +122,75 @@ class _MainDashboardWidgetState extends State<MainDashboardWidget> {
                               height: 24.0,
                               decoration: const BoxDecoration(),
                             ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                16.0, 16.0, 0.0, 4.0),
-                            child: Text(
-                              'Dashboard',
-                              style: FlutterFlowTheme.of(context)
-                                  .headlineMedium
-                                  .override(
-                                    fontFamily: 'Outfit',
-                                    letterSpacing: 0.0,
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 16.0, 0.0, 4.0),
+                                child: RichText(
+                                  textScaler: MediaQuery.of(context).textScaler,
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Dashboard - ',
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineMedium
+                                            .override(
+                                              fontFamily: 'Outfit',
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                      TextSpan(
+                                        text: FFAppState().userRole,
+                                        style: const TextStyle(),
+                                      )
+                                    ],
+                                    style: FlutterFlowTheme.of(context)
+                                        .headlineMedium
+                                        .override(
+                                          fontFamily: 'Outfit',
+                                          letterSpacing: 0.0,
+                                        ),
                                   ),
-                            ),
+                                ),
+                              ),
+                              if (FFAppState().userRole == 'Client')
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 24.0, 0.0),
+                                  child: FFButtonWidget(
+                                    onPressed: () async {
+                                      context.pushNamed('main_new_claim');
+                                    },
+                                    text: 'New Claim',
+                                    options: FFButtonOptions(
+                                      height: 40.0,
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
+                                          24.0, 0.0, 24.0, 0.0),
+                                      iconPadding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            fontFamily: 'Plus Jakarta Sans',
+                                            color: Colors.white,
+                                            letterSpacing: 0.0,
+                                          ),
+                                      elevation: 3.0,
+                                      borderSide: const BorderSide(
+                                        color: Colors.transparent,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
@@ -141,140 +205,6 @@ class _MainDashboardWidgetState extends State<MainDashboardWidget> {
                                   ),
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 8.0, 16.0, 0.0),
-                                child: FlutterFlowDropDown<String>(
-                                  controller: _model.dropDownValueController ??=
-                                      FormFieldController<String>(null),
-                                  options: const ['name', 'Status', 'Date'],
-                                  onChanged: (val) => setState(
-                                      () => _model.dropDownValue = val),
-                                  width: 300.0,
-                                  height: 56.0,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Plus Jakarta Sans',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  hintText: 'Select column to filter by...',
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 24.0,
-                                  ),
-                                  fillColor: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  elevation: 2.0,
-                                  borderColor:
-                                      FlutterFlowTheme.of(context).alternate,
-                                  borderWidth: 2.0,
-                                  borderRadius: 8.0,
-                                  margin: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 4.0, 16.0, 4.0),
-                                  hidesUnderline: true,
-                                  isOverButton: true,
-                                  isSearchable: false,
-                                  isMultiSelect: false,
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 8.0, 16.0, 0.0),
-                                  child: TextFormField(
-                                    controller: _model.textController,
-                                    focusNode: _model.textFieldFocusNode,
-                                    onChanged: (_) => EasyDebounce.debounce(
-                                      '_model.textController',
-                                      const Duration(milliseconds: 2000),
-                                      () async {},
-                                    ),
-                                    autofocus: false,
-                                    textCapitalization:
-                                        TextCapitalization.words,
-                                    obscureText: false,
-                                    decoration: InputDecoration(
-                                      labelText: 'Search all claims...',
-                                      labelStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            fontFamily: 'Plus Jakarta Sans',
-                                            letterSpacing: 0.0,
-                                          ),
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            fontFamily: 'Plus Jakarta Sans',
-                                            letterSpacing: 0.0,
-                                          ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .alternate,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              20.0, 0.0, 0.0, 0.0),
-                                      suffixIcon: Icon(
-                                        Icons.search_rounded,
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                      ),
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Plus Jakarta Sans',
-                                          letterSpacing: 0.0,
-                                        ),
-                                    cursorColor:
-                                        FlutterFlowTheme.of(context).primary,
-                                    validator: _model.textControllerValidator
-                                        .asValidator(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                           if (responsiveVisibility(
                             context: context,
                             phone: false,
@@ -286,307 +216,501 @@ class _MainDashboardWidgetState extends State<MainDashboardWidget> {
                               decoration: const BoxDecoration(),
                             ),
                           Flexible(
-                            child: Container(
-                              height: 600.0,
-                              decoration: const BoxDecoration(),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 0.0, 16.0, 0.0),
-                                child: Builder(
-                                  builder: (context) {
-                                    final claimsTable =
-                                        _model.claimsDataRows.toList();
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
+                              child: Container(
+                                height: 550.0,
+                                decoration: const BoxDecoration(),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
+                                  child: Builder(
+                                    builder: (context) {
+                                      final claimsTable =
+                                          _model.claimsDataRows.toList();
 
-                                    return FlutterFlowDataTable<ClaimsRow>(
-                                      controller:
-                                          _model.paginatedDataTableController,
-                                      data: claimsTable,
-                                      columnsBuilder: (onSortChanged) => [
-                                        DataColumn2(
-                                          label: DefaultTextStyle.merge(
-                                            softWrap: true,
-                                            child: Text(
-                                              'ID',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Plus Jakarta Sans',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          fixedWidth: 60.0,
-                                          onSort: onSortChanged,
-                                        ),
-                                        DataColumn2(
-                                          label: DefaultTextStyle.merge(
-                                            softWrap: true,
-                                            child: Text(
-                                              'Client',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Plus Jakarta Sans',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          onSort: onSortChanged,
-                                        ),
-                                        DataColumn2(
-                                          label: DefaultTextStyle.merge(
-                                            softWrap: true,
-                                            child: Text(
-                                              'Date',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Plus Jakarta Sans',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          onSort: onSortChanged,
-                                        ),
-                                        DataColumn2(
-                                          label: DefaultTextStyle.merge(
-                                            softWrap: true,
-                                            child: Text(
-                                              'Status',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Plus Jakarta Sans',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn2(
-                                          label: DefaultTextStyle.merge(
-                                            softWrap: true,
-                                            child: Text(
-                                              'Actions',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Plus Jakarta Sans',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      dataRowBuilder: (claimsTableItem,
-                                              claimsTableIndex,
-                                              selected,
-                                              onSelectChanged) =>
-                                          DataRow(
-                                        selected: selected,
-                                        onSelectChanged: onSelectChanged,
-                                        color: WidgetStateProperty.all(
-                                          claimsTableIndex % 2 == 0
-                                              ? FlutterFlowTheme.of(context)
-                                                  .alternate
-                                              : FlutterFlowTheme.of(context)
-                                                  .primaryBackground,
-                                        ),
-                                        cells: [
-                                          Text(
-                                            claimsTableItem.id.toString(),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'Plus Jakarta Sans',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Text(
-                                            valueOrDefault<String>(
-                                              claimsTableItem.name,
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'Plus Jakarta Sans',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Text(
-                                            valueOrDefault<String>(
-                                              claimsTableItem.createdAt
-                                                  .toString(),
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'Plus Jakarta Sans',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Text(
-                                            valueOrDefault<String>(
-                                              claimsTableItem.status,
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'Plus Jakarta Sans',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        0.0, 0.0, 12.0, 0.0),
-                                                child: FlutterFlowIconButton(
-                                                  borderColor:
-                                                      Colors.transparent,
-                                                  borderRadius: 20.0,
-                                                  borderWidth: 1.0,
-                                                  buttonSize: 40.0,
-                                                  fillColor: const Color(0xC230FF3C),
-                                                  hoverColor: const Color(0x8502F60F),
-                                                  icon: const FaIcon(
-                                                    FontAwesomeIcons.check,
-                                                    color: Colors.white,
-                                                    size: 24.0,
-                                                  ),
-                                                  onPressed: () async {
-                                                    await ClaimsTable().update(
-                                                      data: {
-                                                        'status': 'Approved',
-                                                      },
-                                                      matchingRows: (rows) =>
-                                                          rows.eq(
-                                                        'id',
-                                                        claimsTableItem.id,
-                                                      ),
-                                                    );
-                                                    _model.updatedClaimsList =
-                                                        await ClaimsTable()
-                                                            .queryRows(
-                                                      queryFn: (q) => q.order(
-                                                          'id',
-                                                          ascending: true),
-                                                    );
-                                                    _model.claimsDataRows =
-                                                        _model
-                                                            .updatedClaimsList!
-                                                            .toList()
-                                                            .cast<ClaimsRow>();
-                                                    setState(() {});
-
-                                                    setState(() {});
-                                                  },
-                                                ),
+                                      return FlutterFlowDataTable<ClaimsRow>(
+                                        controller:
+                                            _model.paginatedDataTableController,
+                                        data: claimsTable,
+                                        columnsBuilder: (onSortChanged) => [
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'ID',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
                                               ),
-                                              Padding(
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        0.0, 0.0, 12.0, 0.0),
-                                                child: FlutterFlowIconButton(
-                                                  borderColor:
+                                            ),
+                                            fixedWidth: 60.0,
+                                            onSort: onSortChanged,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Client',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                            fixedWidth: 120.0,
+                                            onSort: onSortChanged,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Image',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                            fixedWidth: 100.0,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Damages',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                            fixedWidth: 350.0,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Status',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                            fixedWidth: 120.0,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Date',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                            onSort: onSortChanged,
+                                          ),
+                                          DataColumn2(
+                                            label: DefaultTextStyle.merge(
+                                              softWrap: true,
+                                              child: Text(
+                                                'Actions',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelLarge
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        dataRowBuilder: (claimsTableItem,
+                                                claimsTableIndex,
+                                                selected,
+                                                onSelectChanged) =>
+                                            DataRow(
+                                          color: WidgetStateProperty.all(
+                                            claimsTableIndex % 2 == 0
+                                                ? FlutterFlowTheme.of(context)
+                                                    .alternate
+                                                : FlutterFlowTheme.of(context)
+                                                    .primaryBackground,
+                                          ),
+                                          cells: [
+                                            Text(
+                                              claimsTableItem.id.toString(),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Plus Jakarta Sans',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                            ),
+                                            Text(
+                                              valueOrDefault<String>(
+                                                claimsTableItem.name,
+                                                '0',
+                                              ),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Plus Jakarta Sans',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                            ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                InkWell(
+                                                  splashColor:
                                                       Colors.transparent,
-                                                  borderRadius: 20.0,
-                                                  borderWidth: 1.0,
-                                                  buttonSize: 40.0,
-                                                  fillColor: const Color(0xD3F03A3A),
-                                                  hoverColor: const Color(0x99E54444),
-                                                  hoverIconColor: Colors.white,
-                                                  icon: const FaIcon(
-                                                    FontAwesomeIcons.times,
-                                                    color: Colors.white,
-                                                    size: 24.0,
-                                                  ),
-                                                  onPressed: () async {
-                                                    await ClaimsTable().update(
-                                                      data: {
-                                                        'status': 'Rejected',
-                                                      },
-                                                      matchingRows: (rows) =>
-                                                          rows.eq(
-                                                        'id',
-                                                        claimsTableItem.id,
+                                                  focusColor:
+                                                      Colors.transparent,
+                                                  hoverColor:
+                                                      Colors.transparent,
+                                                  highlightColor:
+                                                      Colors.transparent,
+                                                  onTap: () async {
+                                                    await Navigator.push(
+                                                      context,
+                                                      PageTransition(
+                                                        type: PageTransitionType
+                                                            .fade,
+                                                        child:
+                                                            FlutterFlowExpandedImageView(
+                                                          image: Image.network(
+                                                            valueOrDefault<
+                                                                String>(
+                                                              claimsTableItem
+                                                                  .imageUrl,
+                                                              'https://picsum.photos/seed/6/600',
+                                                            ),
+                                                            fit: BoxFit.contain,
+                                                          ),
+                                                          allowRotation: false,
+                                                          tag: valueOrDefault<
+                                                              String>(
+                                                            claimsTableItem
+                                                                .imageUrl,
+                                                            'https://picsum.photos/seed/6/600' '$claimsTableIndex',
+                                                          ),
+                                                          useHeroAnimation:
+                                                              true,
+                                                        ),
                                                       ),
                                                     );
-                                                    _model.updatedClaimsList2 =
-                                                        await ClaimsTable()
-                                                            .queryRows(
-                                                      queryFn: (q) => q.order(
-                                                          'id',
-                                                          ascending: true),
-                                                    );
-                                                    _model.claimsDataRows =
-                                                        _model
-                                                            .updatedClaimsList2!
-                                                            .toList()
-                                                            .cast<ClaimsRow>();
-                                                    setState(() {});
-
-                                                    setState(() {});
                                                   },
+                                                  child: Hero(
+                                                    tag: valueOrDefault<String>(
+                                                      claimsTableItem.imageUrl,
+                                                      'https://picsum.photos/seed/6/600' '$claimsTableIndex',
+                                                    ),
+                                                    transitionOnUserGestures:
+                                                        true,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      child: Image.network(
+                                                        valueOrDefault<String>(
+                                                          claimsTableItem
+                                                              .imageUrl,
+                                                          'https://picsum.photos/seed/6/600',
+                                                        ),
+                                                        width: 50.0,
+                                                        height: 50.0,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
+                                              ],
+                                            ),
+                                            Text(
+                                              valueOrDefault<String>(
+                                                claimsTableItem.parts,
+                                                'N.A',
                                               ),
-                                            ],
-                                          ),
-                                        ].map((c) => DataCell(c)).toList(),
-                                      ),
-                                      onPageChanged: (currentRowIndex) async {},
-                                      onSortChanged:
-                                          (columnIndex, ascending) async {},
-                                      paginated: true,
-                                      selectable: true,
-                                      hidePaginator: false,
-                                      showFirstLastButtons: false,
-                                      headingRowHeight: 56.0,
-                                      dataRowHeight: 48.0,
-                                      columnSpacing: 20.0,
-                                      headingRowColor:
-                                          FlutterFlowTheme.of(context)
-                                              .primaryBackground,
-                                      sortIconColor:
-                                          FlutterFlowTheme.of(context).primary,
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      addHorizontalDivider: true,
-                                      addTopAndBottomDivider: false,
-                                      hideDefaultHorizontalDivider: true,
-                                      horizontalDividerColor:
-                                          FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                      horizontalDividerThickness: 1.0,
-                                      addVerticalDivider: false,
-                                      checkboxUnselectedFillColor:
-                                          Colors.transparent,
-                                      checkboxSelectedFillColor:
-                                          Colors.transparent,
-                                      checkboxCheckColor: const Color(0x8A000000),
-                                      checkboxUnselectedBorderColor:
-                                          const Color(0x8A000000),
-                                      checkboxSelectedBorderColor:
-                                          const Color(0x8A000000),
-                                    );
-                                  },
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Plus Jakarta Sans',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                            ),
+                                            Text(
+                                              valueOrDefault<String>(
+                                                claimsTableItem.status,
+                                                '0',
+                                              ),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Plus Jakarta Sans',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                            ),
+                                            Text(
+                                              valueOrDefault<String>(
+                                                claimsTableItem.createdAt
+                                                    .toString(),
+                                                '0',
+                                              ),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Plus Jakarta Sans',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                            ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                if (FFAppState().userRole ==
+                                                    'Broker')
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                12.0, 0.0),
+                                                    child:
+                                                        FlutterFlowIconButton(
+                                                      borderColor:
+                                                          Colors.transparent,
+                                                      borderRadius: 20.0,
+                                                      borderWidth: 1.0,
+                                                      buttonSize: 40.0,
+                                                      fillColor:
+                                                          const Color(0xC230FF3C),
+                                                      hoverColor:
+                                                          const Color(0x8502F60F),
+                                                      icon: const FaIcon(
+                                                        FontAwesomeIcons.check,
+                                                        color: Colors.white,
+                                                        size: 24.0,
+                                                      ),
+                                                      onPressed: () async {
+                                                        await ClaimsTable()
+                                                            .update(
+                                                          data: {
+                                                            'status':
+                                                                'Approved',
+                                                          },
+                                                          matchingRows:
+                                                              (rows) => rows.eq(
+                                                            'id',
+                                                            claimsTableItem.id,
+                                                          ),
+                                                        );
+                                                        _model.updatedClaimsList =
+                                                            await ClaimsTable()
+                                                                .queryRows(
+                                                          queryFn: (q) =>
+                                                              q.order('id',
+                                                                  ascending:
+                                                                      true),
+                                                        );
+                                                        _model.claimsDataRows =
+                                                            _model
+                                                                .updatedClaimsList!
+                                                                .toList()
+                                                                .cast<
+                                                                    ClaimsRow>();
+                                                        setState(() {});
+
+                                                        setState(() {});
+                                                      },
+                                                    ),
+                                                  ),
+                                                if (FFAppState().userRole ==
+                                                    'Broker')
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                12.0, 0.0),
+                                                    child:
+                                                        FlutterFlowIconButton(
+                                                      borderColor:
+                                                          Colors.transparent,
+                                                      borderRadius: 20.0,
+                                                      borderWidth: 1.0,
+                                                      buttonSize: 40.0,
+                                                      fillColor:
+                                                          const Color(0xD3F03A3A),
+                                                      hoverColor:
+                                                          const Color(0x99E54444),
+                                                      hoverIconColor:
+                                                          Colors.white,
+                                                      icon: const FaIcon(
+                                                        FontAwesomeIcons.times,
+                                                        color: Colors.white,
+                                                        size: 24.0,
+                                                      ),
+                                                      onPressed: () async {
+                                                        await ClaimsTable()
+                                                            .update(
+                                                          data: {
+                                                            'status':
+                                                                'Rejected',
+                                                          },
+                                                          matchingRows:
+                                                              (rows) => rows.eq(
+                                                            'id',
+                                                            claimsTableItem.id,
+                                                          ),
+                                                        );
+                                                        _model.updatedClaimsList2 =
+                                                            await ClaimsTable()
+                                                                .queryRows(
+                                                          queryFn: (q) =>
+                                                              q.order('id',
+                                                                  ascending:
+                                                                      true),
+                                                        );
+                                                        _model.claimsDataRows =
+                                                            _model
+                                                                .updatedClaimsList2!
+                                                                .toList()
+                                                                .cast<
+                                                                    ClaimsRow>();
+                                                        setState(() {});
+
+                                                        setState(() {});
+                                                      },
+                                                    ),
+                                                  ),
+                                                if (FFAppState().userRole ==
+                                                    'Client')
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                12.0, 0.0),
+                                                    child:
+                                                        FlutterFlowIconButton(
+                                                      borderColor:
+                                                          Colors.transparent,
+                                                      borderRadius: 20.0,
+                                                      borderWidth: 1.0,
+                                                      buttonSize: 40.0,
+                                                      fillColor:
+                                                          const Color(0xD3F03A3A),
+                                                      hoverColor:
+                                                          const Color(0x99E54444),
+                                                      hoverIconColor:
+                                                          Colors.white,
+                                                      icon: const FaIcon(
+                                                        FontAwesomeIcons
+                                                            .solidTrashAlt,
+                                                        color: Colors.white,
+                                                        size: 20.0,
+                                                      ),
+                                                      onPressed: () async {
+                                                        await ClaimsTable()
+                                                            .delete(
+                                                          matchingRows:
+                                                              (rows) => rows.eq(
+                                                            'id',
+                                                            claimsTableItem.id,
+                                                          ),
+                                                        );
+                                                        _model.updatedClaimsList3 =
+                                                            await ClaimsTable()
+                                                                .queryRows(
+                                                          queryFn: (q) =>
+                                                              q.order('id',
+                                                                  ascending:
+                                                                      true),
+                                                        );
+                                                        _model.claimsDataRows =
+                                                            _model
+                                                                .updatedClaimsList3!
+                                                                .toList()
+                                                                .cast<
+                                                                    ClaimsRow>();
+                                                        setState(() {});
+
+                                                        setState(() {});
+                                                      },
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ].map((c) => DataCell(c)).toList(),
+                                        ),
+                                        onPageChanged:
+                                            (currentRowIndex) async {},
+                                        onSortChanged:
+                                            (columnIndex, ascending) async {},
+                                        paginated: true,
+                                        selectable: false,
+                                        hidePaginator: false,
+                                        showFirstLastButtons: false,
+                                        headingRowHeight: 56.0,
+                                        dataRowHeight: 80.0,
+                                        columnSpacing: 20.0,
+                                        headingRowColor:
+                                            FlutterFlowTheme.of(context)
+                                                .primaryBackground,
+                                        sortIconColor:
+                                            FlutterFlowTheme.of(context)
+                                                .primary,
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        addHorizontalDivider: true,
+                                        addTopAndBottomDivider: false,
+                                        hideDefaultHorizontalDivider: true,
+                                        horizontalDividerColor:
+                                            FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                        horizontalDividerThickness: 1.0,
+                                        addVerticalDivider: false,
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),

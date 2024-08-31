@@ -2,7 +2,6 @@ import '/backend/supabase/supabase.dart';
 import '/components/side_nav_widget.dart';
 import '/flutter_flow/flutter_flow_data_table.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/form_field_controller.dart';
 import 'main_dashboard_widget.dart' show MainDashboardWidget;
 import 'package:flutter/material.dart';
 
@@ -25,18 +24,13 @@ class MainDashboardModel extends FlutterFlowModel<MainDashboardWidget> {
 
   final unfocusNode = FocusNode();
   // Stores action output result for [Backend Call - Query Rows] action in main_dashboard widget.
+  List<ClaimsRow>? claimsClient;
+  // Stores action output result for [Backend Call - Query Rows] action in main_dashboard widget.
   List<ClaimsRow>? claimsAll;
   // Stores action output result for [Backend Call - Query Rows] action in main_dashboard widget.
   List<UsersRow>? authUser;
   // Model for sideNav component.
   late SideNavModel sideNavModel;
-  // State field(s) for DropDown widget.
-  String? dropDownValue;
-  FormFieldController<String>? dropDownValueController;
-  // State field(s) for TextField widget.
-  FocusNode? textFieldFocusNode;
-  TextEditingController? textController;
-  String? Function(BuildContext, String?)? textControllerValidator;
   // State field(s) for PaginatedDataTable widget.
   final paginatedDataTableController =
       FlutterFlowDataTableController<ClaimsRow>();
@@ -44,6 +38,8 @@ class MainDashboardModel extends FlutterFlowModel<MainDashboardWidget> {
   List<ClaimsRow>? updatedClaimsList;
   // Stores action output result for [Backend Call - Query Rows] action in IconButton widget.
   List<ClaimsRow>? updatedClaimsList2;
+  // Stores action output result for [Backend Call - Query Rows] action in IconButton widget.
+  List<ClaimsRow>? updatedClaimsList3;
 
   @override
   void initState(BuildContext context) {
@@ -53,9 +49,6 @@ class MainDashboardModel extends FlutterFlowModel<MainDashboardWidget> {
   @override
   void dispose() {
     sideNavModel.dispose();
-    textFieldFocusNode?.dispose();
-    textController?.dispose();
-
     paginatedDataTableController.dispose();
   }
 }

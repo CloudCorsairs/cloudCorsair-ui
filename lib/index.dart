@@ -10,3 +10,5 @@ export '/auth/forgot_password/forgot_password_widget.dart'
     show ForgotPasswordWidget;
 export '/pages/main_users/main_users_widget.dart' show MainUsersWidget;
 export '/auth/profile/profile_widget.dart' show ProfileWidget;
+export '/pages/main_new_claim/main_new_claim_widget.dart'
+    show MainNewClaimWidget;

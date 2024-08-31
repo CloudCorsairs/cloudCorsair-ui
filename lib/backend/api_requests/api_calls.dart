@@ -60,6 +60,35 @@ class GetAllClaimsCall {
   }
 }
 
+class ProcessPhotoCall {
+  static Future<ApiCallResponse> call({
+    String? imageUrl = '',
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "url": "$imageUrl"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'processPhoto',
+      apiUrl: 'http://52.224.95.167/sentinel-corsair',
+      callType: ApiCallType.POST,
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;

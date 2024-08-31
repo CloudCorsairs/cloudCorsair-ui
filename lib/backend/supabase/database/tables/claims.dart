@@ -34,4 +34,7 @@ class ClaimsRow extends SupabaseDataRow {
 
   String? get name => getField<String>('name');
   set name(String? value) => setField<String>('name', value);
+
+  String? get parts => getField<String>('parts');
+  set parts(String? value) => setField<String>('parts', value);
 }
