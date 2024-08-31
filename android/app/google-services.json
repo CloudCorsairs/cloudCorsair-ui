@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "84705233733",
+    "project_id": "claimsentinel",
+    "storage_bucket": "claimsentinel.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84705233733:android:7b155de8738b0b6a524c2c",
+        "android_client_info": {
+          "package_name": "com.mycompany.claimsentinel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "84705233733-06720bct25h3eellqjrm2pugll409bbi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.claimsentinel",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "84705233733-l6e35dar37gssh5edip4o99i1sbc0jo7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlIPH7UuCi1CF0XXbjNLexX0j4C28bjj0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "84705233733-l6e35dar37gssh5edip4o99i1sbc0jo7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "84705233733-9revnq5nujhahiuiot173vpabgv4jt4e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.claimsentinel"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
